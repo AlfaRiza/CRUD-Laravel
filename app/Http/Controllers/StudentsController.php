@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Student;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Validator;
 
 class StudentsController extends Controller
 {
@@ -22,10 +23,12 @@ class StudentsController extends Controller
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
+     * @return \Illuminate\Validation\Validator::validateIsValid
+     * 
      */
     public function create()
     {
-        return view('students.create');
+        return view('students.create',compact('nama'));
     }
 
     /**
@@ -33,6 +36,7 @@ class StudentsController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
+     * @return \Illuminate\Validation\Validator::validateIsValid
      */
     public function store(Request $request)
     {
@@ -48,11 +52,11 @@ class StudentsController extends Controller
         //     'nim' => $request->nim,
         //     'email' => $request->email,
         // ]);
-
+        
         $request->validate([
             'nama' => 'required',
             'nim' => 'required|size:9',
-            'email' => 'required|is_valid',
+            'email' => 'required',
         ]);
         Student::create($request->all());
         return redirect('/students')->with('status','data berhasil ditambahkan');
@@ -77,7 +81,7 @@ class StudentsController extends Controller
      */
     public function edit(Student $student)
     {
-        //
+        return view('students.edit', compact('student'));
     }
 
     /**
@@ -89,7 +93,18 @@ class StudentsController extends Controller
      */
     public function update(Request $request, Student $student)
     {
-        //
+        $request->validate([
+            'nama' => 'required',
+            'nim' => 'required|size:9',
+            'email' => 'required'
+        ]);
+
+        Student::where('id', $student->id)
+        ->update(['nama' => $request->nama,
+                    'nim' => $request->nim,
+                    'email' => $request->email
+        ]);
+        return redirect('/students')->with('status','data berhasil diubah');
     }
 
     /**
@@ -100,6 +115,7 @@ class StudentsController extends Controller
      */
     public function destroy(Student $student)
     {
-        //
+        Student::destroy($student->id);
+        return redirect('/students')->with('status','data berhasil dihapus');
     }
 }
